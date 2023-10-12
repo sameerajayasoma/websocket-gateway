@@ -3,6 +3,25 @@ import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/websocket;
 
+websocket:ClientAuthConfig auth = {
+    username: "ballerina",
+    issuer: "wso2",
+    audience: ["ballerina", "ballerina.org", "ballerina.io"],
+    keyId: "5a0b754-895f-4279-8843-b745e11a57e9",
+    jwtId: "JlbmMiOiJBMTI4Q0JDLUhTMjU2In",
+    customClaims: {"scp": "admin"},
+    expTime: 3600,
+    signatureConfig: {
+        config: {
+            keyFile: "../resources/private.key"
+        }
+    }
+};
+
+websocket:ClientSecureSocket secureSocket = {
+    cert: "../resources/public.crt"
+};
+
 type RequestMessage record {
     string id;
     string name;
@@ -12,17 +31,18 @@ type RequestMessage record {
 };
 
 public function main(string backend = "Backend_ABC") returns error? {
-        websocket:Client abcClient = check new ("ws://localhost:9090/gateway",
-            customHeaders = {ID: backend}, readTimeout = 30, writeTimeout = 30
-        );
+    websocket:Client abcClient = check new ("wss://localhost:9090/gateway",
+        customHeaders = {ID: backend}, readTimeout = 30, writeTimeout = 30,
+        auth = auth, secureSocket = secureSocket
+    );
 
-        // Spawn two concurrent tasks to read and write messages to the backend.
-        future<error> f1 = start readMessagesFromBackend(abcClient, backend);
-        future<error> f2 = start sendMessageToBackend(abcClient, backend);
+    // Spawn two concurrent tasks to read and write messages to the backend.
+    future<error> f1 = start readMessagesFromBackend(abcClient, backend);
+    future<error> f2 = start sendMessageToBackend(abcClient, backend);
 
-        // Wait for both the futures to complete. They complete only if an error occurs.
-        map<error> errors = wait {f1, f2};
-        io:println("Error occured while reading or writing to backend: ", errors);
+    // Wait for both the futures to complete. They complete only if an error occurs.
+    map<error> errors = wait {f1, f2};
+    io:println("Error occured while reading or writing to backend: ", errors);
 }
 
 // Read messages from the given backend.

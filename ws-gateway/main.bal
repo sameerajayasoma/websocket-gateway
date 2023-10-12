@@ -5,10 +5,33 @@ import ballerina/websocket;
 // Values for these configurations are provided when running the service.
 // See the Config.toml file in the root directory.
 configurable map<string> backends = ?;
-configurable int port = ?;
+
+listener websocket:Listener gwListener = new (9090,
+    secureSocket = {
+        key: {
+            certFile: "../resources/public.crt",
+            keyFile: "../resources/private.key"
+        }
+    }
+);
 
 # This service accepts the WebSocket upgrade request.
-isolated service /gateway on new websocket:Listener(port) {
+@websocket:ServiceConfig {
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: "wso2",
+                audience: "ballerina",
+                signatureConfig: {
+                    certFile: "../resources/public.crt"
+                },
+                scopeKey: "scp"
+            },
+            scopes: ["admin"]
+        }
+    ]
+}
+isolated service /gateway on gwListener {
 
     # Description.
     #

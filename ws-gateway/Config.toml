@@ -1,0 +1,5 @@
+[backends]
+Backend_ABC = "ws://localhost:8081/backend/abc"	
+Backend_PQR = "ws://localhost:8082/backend/pqr"	
+Backend_XYZ = "ws://localhost:8083/backend/xyz"	
+

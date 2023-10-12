@@ -13,6 +13,9 @@ Currently, backend service URLs are hard-coded within the WebSocket gateway usin
 ## Gateway Routing Behaviour 
 The gateway determines the backend to connect with based on the ID HTTP header present in the WebSocket upgrade request initiated by the client. Valid ID header values include "Backend_ABC", "Backend_PQR", and "Backend_XYZ". The sample client is set up to send this header.
 
+## WSS and Self-signed JWT
+The sample client and the gateway uses the WSS protocol. Gateway and backend services uses WS protocol. Additionaly, gateway and client uses self-signed JWT for authentication. 
+
 ## Running the sample 
 
 ### Step 1: Set up the workspace
